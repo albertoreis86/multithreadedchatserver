@@ -36,7 +36,6 @@ public class Server implements Runnable {
                 workerVector.add(serverWorker);
                 Thread serverWorkerThread = new Thread(serverWorker);
                 serverWorkerThread.start();
-
             }
 
         } catch (IOException e) {

@@ -126,7 +126,7 @@ public class ServerWorker2 implements Runnable {
 
             } else {
                 if (worker.getUsername().equals(sendTo)) {
-                    String outMsg = "@" + username + " -> " + content + "\n";
+                    String outMsg = "msg " + username + " " + content + "\n";
                     //text format ex. - @username -> content
                     worker.send(outMsg);
                 }
@@ -174,13 +174,13 @@ public class ServerWorker2 implements Runnable {
                 ) {
                     if (worker.getUsername() != null) {
                         if (!username.equals(worker.getUsername())) {
-                            String mesg2 = "online " + worker.getUsername() + "\n";
-                            send(mesg2);
+                            String msg2 = "online " + worker.getUsername() + "\n";
+                            send(msg2);
                         }
                     }
                 }
                 //send  other online users current status
-                String onlineMsg = "online "+username + "\n";
+                String onlineMsg = "online " + username + "\n";
                 for (ServerWorker2 worker : workerVector) {//this is to avoid receiving message from himself
                     if (!username.equals(worker.getUsername())) {
                         worker.send(onlineMsg);
@@ -196,10 +196,9 @@ public class ServerWorker2 implements Runnable {
         }
     }
 
-    private void send(String messga) throws IOException {
-        //System.out.println(messga);
+    private void send(String msg) throws IOException {
         if (username != null) {
-            outputStream.write(messga.getBytes());
+            outputStream.write(msg.getBytes());
         }
 
     }

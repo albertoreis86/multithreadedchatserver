@@ -32,7 +32,7 @@ public class ServerWorker implements Runnable {
         OutputStream outputStream = clientSocket.getOutputStream();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        String nick=getNickName(outputStream,reader);
+        String nick = getNickName(outputStream, reader);
 
         String line;
         while ((line = reader.readLine()) != null) {
