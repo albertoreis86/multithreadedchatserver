@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Vector;
 
 
@@ -20,6 +21,7 @@ public class ServerWorker2 implements Runnable {
     private SimpleDateFormat sdf = new SimpleDateFormat(" HH:mm"); //REPRESENT THE TIME OF THE MESSAGE
     private String username = null;
     private OutputStream outputStream;
+    private HashSet<String> channelset = new HashSet<>();
 
 
     public ServerWorker2(Server server, Socket clientSocket) {
@@ -64,6 +66,11 @@ public class ServerWorker2 implements Runnable {
                     //it will only split untill the 2nd position,
                     // so the tokenmsg[2] will be the entire message and will not split messagebody
                     handleMessages(tokenMsg);
+                } else if ("join".equals(cmd)) {
+                    handleJoin(tokens);
+
+                } else if ("leave".equals(cmd)) {
+                    handleLeave(tokens);
                 } else {
                     String msg = "unknown command " + cmd + "\n";
                     outputStream.write(msg.getBytes());
@@ -76,17 +83,53 @@ public class ServerWorker2 implements Runnable {
         clientSocket.close();
     }
 
+    private void handleLeave(String[] tokens) {
+        if (tokens.length > 1) {
+            String channel = tokens[1];
+            channelset.remove(channel);
+            //it will remove the channel, not leave it
+        }
+    }
+
+    boolean isChannelMember(String topic) {
+        return channelset.contains(topic);
+    }
+
+    private void handleJoin(String[] tokens) {
+        if (tokens.length > 1) {
+            String channel = tokens[1];
+            channelset.add(channel);
+
+        }
+    }
+
     //format: "msg" "username" content
+    //format: "msg" "#channel" content
+
     private void handleMessages(String[] tokens) throws IOException {
         String sendTo = tokens[1];
-        String msgtoBeSent = tokens[2];
+        String content = tokens[2];
+
+        boolean ischannel = sendTo.split("")[0].equals("#");
+
 
         Vector<ServerWorker2> workerVector = server.getWorkerVector();
 
         for (ServerWorker2 worker : workerVector) {
-            if (worker.getUsername().equals(sendTo)) {
-                String outMsg = username + "->" + msgtoBeSent + "\n";
-                worker.send(outMsg);
+            if (ischannel) {
+                if (worker.isChannelMember(sendTo)) {
+                    //message + channel + content
+                    String outMsg = sendTo + " @" + username + " -> " + content + "\n";
+                    //text format ex. - #channel @username -> content
+                    worker.send(outMsg);
+                }
+
+            } else {
+                if (worker.getUsername().equals(sendTo)) {
+                    String outMsg = "@" + username + " -> " + content + "\n";
+                    //text format ex. - @username -> content
+                    worker.send(outMsg);
+                }
             }
         }
 
@@ -122,9 +165,7 @@ public class ServerWorker2 implements Runnable {
                 String msg = "Login successful\n";
                 outputStream.write(msg.getBytes());
                 this.username = username;
-                System.out.println(username + " has logged in");
-                String loginMsg = username + " - " + sdf.format(new Date()) + "\n";
-                System.out.println(loginMsg);
+                System.out.println(username + " logged in - " + sdf.format(new Date()));
 
 
                 Vector<ServerWorker2> workerVector = server.getWorkerVector();

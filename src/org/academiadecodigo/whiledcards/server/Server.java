@@ -29,7 +29,8 @@ public class Server implements Runnable {
             ServerSocket serverSocket = new ServerSocket(PORT);
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                System.out.println((clientSocket.isConnected() ? "Connection Established with " : "Not able to Connect"));
+                System.out.print((clientSocket.isConnected() ? "Connection Established " : "Not able to Connect"));
+                System.out.println(clientSocket);
                 ServerWorker2 serverWorker = new ServerWorker2(this, clientSocket);
                 workerVector.add(serverWorker);
 
