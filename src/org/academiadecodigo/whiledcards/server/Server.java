@@ -31,9 +31,9 @@ public class Server implements Runnable {
                 Socket clientSocket = serverSocket.accept();
                 System.out.print((clientSocket.isConnected() ? "Connection Established " : "Not able to Connect"));
                 System.out.println(clientSocket);
+
                 ServerWorker2 serverWorker = new ServerWorker2(this, clientSocket);
                 workerVector.add(serverWorker);
-
                 Thread serverWorkerThread = new Thread(serverWorker);
                 serverWorkerThread.start();
 

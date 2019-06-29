@@ -42,12 +42,11 @@ public class ServerWorker2 implements Runnable {
     private void handleClientSocket() throws IOException {
 
         InputStream inputStream = clientSocket.getInputStream();
-        this.outputStream = clientSocket.getOutputStream();
+        outputStream = clientSocket.getOutputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-
         String line;
-
+        //BLOQUEADO AQUI
         while ((line = reader.readLine()) != null) {
             //from apache commons lang to help with tokens reading
             String[] tokens = StringUtils.split(line); //(splits " " )
@@ -74,6 +73,7 @@ public class ServerWorker2 implements Runnable {
                 } else {
                     String msg = "unknown command " + cmd + "\n";
                     outputStream.write(msg.getBytes());
+
                 }
             }
 
@@ -188,15 +188,19 @@ public class ServerWorker2 implements Runnable {
                 }
 
             } else {
-                String msg = username.equalsIgnoreCase("durukaa") ? "Invalid Password" : "Invalid username";
-                msg = msg + " please try again\n";
+               // String msg = username.equalsIgnoreCase("durukaa") ? "Invalid Password" : "Invalid username";
+                String msg = "Login Failed please try again\n";
                 outputStream.write(msg.getBytes());
+                System.err.println("Login Unsuccessful " + username);
             }
         }
     }
 
     private void send(String messga) throws IOException {
-        if (username != null) outputStream.write(messga.getBytes());
+        System.out.println(messga);
+        if (username != null){
+            outputStream.write(messga.getBytes());
+        }
 
     }
 
