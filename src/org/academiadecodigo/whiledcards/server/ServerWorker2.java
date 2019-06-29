@@ -5,6 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.*;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.Vector;
 
 
@@ -15,7 +17,7 @@ public class ServerWorker2 implements Runnable {
 
     private final Server server;
     private final Socket clientSocket;
-    private SimpleDateFormat sdf = new SimpleDateFormat(" hh:mm"); //REPRESENT THE TIME OF THE MESSAGE
+    private SimpleDateFormat sdf = new SimpleDateFormat(" HH:mm"); //REPRESENT THE TIME OF THE MESSAGE
     private String username = null;
     private OutputStream outputStream;
 
@@ -51,12 +53,17 @@ public class ServerWorker2 implements Runnable {
 
             if (tokens != null && tokens.length > 0) {
                 cmd = tokens[0];
-                if ("logout".equalsIgnoreCase(cmd)||"quit".equalsIgnoreCase(cmd)) {
-                    handleLogout();
+                if ("logout".equalsIgnoreCase(cmd) || "quit".equalsIgnoreCase(cmd)) {
                     outputStream.write("You have quit this chat\n".getBytes());
+                    handleLogout();
                     break;
                 } else if ("login".equalsIgnoreCase(cmd)) {
                     handleLogin(outputStream, tokens);
+                } else if ("msg".equalsIgnoreCase(cmd)) {
+                    String[] tokenMsg = StringUtils.split(line, null, 3);
+                    //it will only split untill the 2nd position,
+                    // so the tokenmsg[2] will be the entire message and will not split messagebody
+                    handleMessages(tokenMsg);
                 } else {
                     String msg = "unknown command " + cmd + "\n";
                     outputStream.write(msg.getBytes());
@@ -69,7 +76,26 @@ public class ServerWorker2 implements Runnable {
         clientSocket.close();
     }
 
+    //format: "msg" "username" content
+    private void handleMessages(String[] tokens) throws IOException {
+        String sendTo = tokens[1];
+        String msgtoBeSent = tokens[2];
+
+        Vector<ServerWorker2> workerVector = server.getWorkerVector();
+
+        for (ServerWorker2 worker : workerVector) {
+            if (worker.getUsername().equals(sendTo)) {
+                String outMsg = username + "->" + msgtoBeSent + "\n";
+                worker.send(outMsg);
+            }
+        }
+
+
+    }
+
     private void handleLogout() throws IOException {
+        server.removeWorker(this);
+
         Vector<ServerWorker2> workerVector = server.getWorkerVector();
         //send  other online users current status
         String onlineMsg = username + " is Offline\n";
@@ -90,12 +116,15 @@ public class ServerWorker2 implements Runnable {
         if (tokens.length == 3) {
             String username = tokens[1];
             String password = tokens[2];
-            if ((username.equalsIgnoreCase("durukaa") && password.equals("macaco")) ||
-                    (username.equalsIgnoreCase("alberto") && password.equals("albertao"))) {
+            if ((username.equalsIgnoreCase("dudu") && password.equals("macaco")) ||
+                    (username.equalsIgnoreCase("alberto") && password.equals("albertao")) ||
+                    (username.equalsIgnoreCase("gg") && password.equals("ggg"))) {
                 String msg = "Login successful\n";
                 outputStream.write(msg.getBytes());
                 this.username = username;
                 System.out.println(username + " has logged in");
+                String loginMsg = username + " - " + sdf.format(new Date()) + "\n";
+                System.out.println(loginMsg);
 
 
                 Vector<ServerWorker2> workerVector = server.getWorkerVector();
@@ -104,9 +133,8 @@ public class ServerWorker2 implements Runnable {
                 ) {
                     if (worker.getUsername() != null) {
                         if (!username.equals(worker.getUsername())) {
-                            String mesg2 = "online users: " + worker.getUsername() + "\n";
+                            String mesg2 = worker.getUsername() + " is online \n";
                             send(mesg2);
-
                         }
                     }
                 }
