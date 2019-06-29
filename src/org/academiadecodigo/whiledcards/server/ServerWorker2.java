@@ -141,7 +141,7 @@ public class ServerWorker2 implements Runnable {
 
         Vector<ServerWorker2> workerVector = server.getWorkerVector();
         //send  other online users current status
-        String onlineMsg = username + " is Offline\n";
+        String onlineMsg = "offline " + username + "\n";
         for (ServerWorker2 worker : workerVector) {//this is to avoid receiving message from himself
             if (!username.equals(worker.getUsername())) {
                 worker.send(onlineMsg);
@@ -174,13 +174,13 @@ public class ServerWorker2 implements Runnable {
                 ) {
                     if (worker.getUsername() != null) {
                         if (!username.equals(worker.getUsername())) {
-                            String mesg2 = worker.getUsername() + " is online \n";
+                            String mesg2 = "online " + worker.getUsername() + "\n";
                             send(mesg2);
                         }
                     }
                 }
                 //send  other online users current status
-                String onlineMsg = username + " is online\n";
+                String onlineMsg = "online "+username + "\n";
                 for (ServerWorker2 worker : workerVector) {//this is to avoid receiving message from himself
                     if (!username.equals(worker.getUsername())) {
                         worker.send(onlineMsg);
@@ -188,7 +188,7 @@ public class ServerWorker2 implements Runnable {
                 }
 
             } else {
-               // String msg = username.equalsIgnoreCase("durukaa") ? "Invalid Password" : "Invalid username";
+                // String msg = username.equalsIgnoreCase("durukaa") ? "Invalid Password" : "Invalid username";
                 String msg = "Login Failed please try again\n";
                 outputStream.write(msg.getBytes());
                 System.err.println("Login Unsuccessful " + username);
@@ -197,8 +197,8 @@ public class ServerWorker2 implements Runnable {
     }
 
     private void send(String messga) throws IOException {
-        System.out.println(messga);
-        if (username != null){
+        //System.out.println(messga);
+        if (username != null) {
             outputStream.write(messga.getBytes());
         }
 
