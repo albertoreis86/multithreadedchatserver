@@ -6,36 +6,41 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server implements Runnable {
-
     private final int PORT;
+
     private SimpleDateFormat sdf = new SimpleDateFormat(" HH:mm"); //REPRESENT THE TIME OF THE MESSAGE
 
-    private Vector<ServerWorker2> workerVector = new Vector<>();
+    public Vector<ServerWorker> getWorkerVector() {
+        return workerVector;
+    }
 
+    private Vector<ServerWorker> workerVector = new Vector<>();
 
     public Server(int port) {
         this.PORT = port;
     }
 
-    public Vector<ServerWorker2> getWorkerVector() {
-        return workerVector;
-    }
+    private ExecutorService cachedPool = Executors.newCachedThreadPool();
 
     @Override
     public void run() {
         try {
+
             ServerSocket serverSocket = new ServerSocket(PORT);
+
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 System.out.print((clientSocket.isConnected() ? "Connection Established " : "Not able to Connect"));
                 System.out.println(clientSocket);
 
-                ServerWorker2 serverWorker = new ServerWorker2(this, clientSocket);
+                ServerWorker serverWorker = new ServerWorker(this, clientSocket);
+                cachedPool.submit(serverWorker);
                 workerVector.add(serverWorker);
-                Thread serverWorkerThread = new Thread(serverWorker);
-                serverWorkerThread.start();
+
             }
 
         } catch (IOException e) {
@@ -43,10 +48,10 @@ public class Server implements Runnable {
         }
     }
 
-    public void removeWorker(ServerWorker2 serverWorker2) {
-        String logoutMsg = "logout: " + serverWorker2.getUsername() + " - " + sdf.format(new Date()) + "\n";
-        System.out.println(logoutMsg); //-- this must be written to a logfile
+    public void removeWorker(ServerWorker serverWorker) {
+        String logoutMsg = "logout: " + serverWorker.getUsername() + " - " + sdf.format(new Date()) + "\n";
+        System.out.println(logoutMsg);
 
-        workerVector.remove(serverWorker2); //it will remove this serverworker from that "list"
+        workerVector.remove(serverWorker);
     }
 }
