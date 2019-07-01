@@ -10,21 +10,22 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server implements Runnable {
+
     private final int PORT;
 
     private SimpleDateFormat sdf = new SimpleDateFormat(" HH:mm"); //REPRESENT THE TIME OF THE MESSAGE
+
+    private Vector<ServerWorker> workerVector = new Vector<>();
+
+    private ExecutorService cachedPool = Executors.newCachedThreadPool();
 
     public Vector<ServerWorker> getWorkerVector() {
         return workerVector;
     }
 
-    private Vector<ServerWorker> workerVector = new Vector<>();
-
     public Server(int port) {
         this.PORT = port;
     }
-
-    private ExecutorService cachedPool = Executors.newCachedThreadPool();
 
     @Override
     public void run() {
@@ -42,7 +43,6 @@ public class Server implements Runnable {
                 workerVector.add(serverWorker);
 
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -14,9 +14,9 @@ import java.util.Vector;
  */
 public class ServerWorker implements Runnable {
 
-    private final Server server;
-    private final Socket clientSocket;
     private SimpleDateFormat sdf = new SimpleDateFormat(" HH:mm"); //REPRESENT THE TIME OF THE MESSAGE
+    private static Server server;
+    private final Socket clientSocket;
     private String username = null;
     private OutputStream outputStream;
 
@@ -29,15 +29,17 @@ public class ServerWorker implements Runnable {
 
     @Override
     public void run() {
-
         try {
+
             handleClientSocket();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void handleClientSocket() throws IOException {
+        String welcomeMsg="Yo! if you are new type /instructions for instructions.\n";
 
         InputStream inputStream = clientSocket.getInputStream();
         outputStream = clientSocket.getOutputStream();
@@ -45,10 +47,6 @@ public class ServerWorker implements Runnable {
 
         String line;
 
-        String instructions = "/login - set up a nickname\n" + "/logout - closes the connection\n" + "/msg all will send a message to all online users\n" +
-                "/msg username - will send a private message for that username\n/instructions - will show these instructions again\n";
-
-        String welcomeMsg="Yo! if you are new type /instructions for instructions.\n";
         outputStream.write(welcomeMsg.getBytes());
 
         while ((line = reader.readLine()) != null) {
@@ -71,7 +69,7 @@ public class ServerWorker implements Runnable {
                     // so the tokenmsg[2] will be the entire message and will not split messagebody
                     handleMessages(tokenMsg);
                 } else if ("/instructions".equals(cmd)){
-                    outputStream.write(instructions.getBytes());
+                    outputStream.write(getInstructions().getBytes());
 
                 } else{
                     String msg = "unknown command " + cmd + "\n";
@@ -84,7 +82,10 @@ public class ServerWorker implements Runnable {
 
         clientSocket.close();
     }
-
+    private String getInstructions(){
+        return "/login - set up a nickname\n" + "/logout - closes the connection\n" + "/msg all will send a message to all online users\n" +
+                "/msg username - will send a private message for that username\n/instructions - will show these instructions again\n";
+    }
 
     private String getTime() {
         return " -> " + sdf.format(new Date());
@@ -113,7 +114,6 @@ public class ServerWorker implements Runnable {
             }
         }
     }
-
 
     private void handleLogout() throws IOException {
         server.removeWorker(this);
@@ -176,6 +176,5 @@ public class ServerWorker implements Runnable {
         }
 
     }
-
 
 }
