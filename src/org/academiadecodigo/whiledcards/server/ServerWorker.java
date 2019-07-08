@@ -14,7 +14,7 @@ import java.util.Vector;
  */
 public class ServerWorker implements Runnable {
 
-    private SimpleDateFormat sdf = new SimpleDateFormat(" HH:mm"); //REPRESENT THE TIME OF THE MESSAGE
+    private SimpleDateFormat sdf = new SimpleDateFormat(" HH:mm");
     private static Server server;
     private final Socket clientSocket;
     private String username = null;
@@ -65,8 +65,6 @@ public class ServerWorker implements Runnable {
                     handleLogin(outputStream, tokens);
                 } else if ("msg".equalsIgnoreCase(cmd)) {
                     String[] tokenMsg = StringUtils.split(line, null, 3);
-                    //it will only split untill the 2nd position,
-                    // so the tokenmsg[2] will be the entire message and will not split messagebody
                     handleMessages(tokenMsg);
                 } else if ("/instructions".equals(cmd)){
                     outputStream.write(getInstructions().getBytes());
@@ -91,7 +89,6 @@ public class ServerWorker implements Runnable {
         return " -> " + sdf.format(new Date());
     }
 
-    //format: "msg" "username" content
     private void handleMessages(String[] tokens) throws IOException {
         String sendTo = tokens[1];
         String content = tokens[2];
@@ -109,7 +106,6 @@ public class ServerWorker implements Runnable {
         for (ServerWorker worker : workerVector) {
             if (worker.getUsername().equals(sendTo)) {
                 String outMsg = "msg " + username + " " + content + getTime() + "\n";
-                //text format ex. - @username -> content
                 worker.send(outMsg);
             }
         }
@@ -119,7 +115,6 @@ public class ServerWorker implements Runnable {
         server.removeWorker(this);
 
         Vector<ServerWorker> workerVector = server.getWorkerVector();
-        //send  other online users current status
         broadcastStatus(username, workerVector, "offline");
         clientSocket.close();
 
@@ -146,7 +141,7 @@ public class ServerWorker implements Runnable {
             broadcastStatus(username, workerVector, "online");
 
         } else {
-            String msg = "Try again bitch.\n";
+            String msg = "Try again.\n";
             outputStream.write(msg.getBytes());
             System.err.println("Login Unsuccessful " + username);
         }

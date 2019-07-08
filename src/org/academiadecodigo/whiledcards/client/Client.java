@@ -20,12 +20,12 @@ public class Client {
     private InputStream serverIn;
     private OutputStream serverOut;
 
-    private Scanner scanner=new Scanner(System.in);
+    private Scanner scanner = new Scanner(System.in);
 
     private BufferedReader bufferedIn;
 
-    private Vector<ClientStatusListener> clientStatuses = new Vector<>(); //?? why does it have to be an array?
-    private Vector<MessageListener> messageListeners = new Vector<>();//??
+    private Vector<ClientStatusListener> clientStatuses = new Vector<>();
+    private Vector<MessageListener> messageListeners = new Vector<>();
 
 
     public Client(String servername, int port) {
@@ -58,22 +58,19 @@ public class Client {
             System.err.println("Connection Failed");
         } else {
             System.out.println("Connection Established");
-            String username,password;
-            System.out.println("username: "+(username=scanner.nextLine())+" password: "+(password =scanner.nextLine()));
+            String username, password;
+            System.out.println("username: " + (username = scanner.nextLine()) + " password: " + (password = scanner.nextLine()));
             if (login(username, password)) {
 
                 startMessageReader();
-                System.out.println("type an username to send a private " +
-                        "message or type all to send to everyone online ");
-                while (true){
-                    String dest,content;
+                System.out.println("type an username to send a private " + "message or type all to send to everyone online ");
+                while (true) {
+                    String dest, content;
 
-                    System.out.println("MessageTo: "+ (dest=scanner.next())+" message: "+(content=scanner.next()));
+                    System.out.println("MessageTo: " + (dest = scanner.next()) + " message: " + (content = scanner.next()));
 
                     message(dest, content);
                 }
-
-
 
             } else {
                 System.err.println("login failed");
@@ -134,8 +131,7 @@ public class Client {
         String username = tokenMsg[1];
         String content = tokenMsg[2];
 
-        for (MessageListener listener : messageListeners
-        ) {
+        for (MessageListener listener : messageListeners) {
             listener.onMessage(username, content);
         }
 
@@ -143,8 +139,7 @@ public class Client {
 
     private void handleOffline(String[] tokens) {
         String login = tokens[1];
-        for (ClientStatusListener status : clientStatuses
-        ) {
+        for (ClientStatusListener status : clientStatuses) {
             status.offLine(login);
 
         }
@@ -152,8 +147,7 @@ public class Client {
 
     private void handleOnline(String[] tokens) {
         String login = tokens[1];
-        for (ClientStatusListener status : clientStatuses
-        ) {
+        for (ClientStatusListener status : clientStatuses) {
             status.onLine(login);
 
         }
